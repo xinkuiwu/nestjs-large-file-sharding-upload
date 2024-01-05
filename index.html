@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+<body>
+<!--多文件上传-->
+<!--<input type="file" id="fileInput" multiple />-->
+<!--  <script>-->
+<!--    const fileInput = document.querySelector('#fileInput')-->
+
+<!--    fileInput.onchange = async function() {-->
+<!--      const data = new FormData()-->
+<!--      data.set('name','wu')-->
+<!--      data.set('age', 20)-->
+
+<!--      [...fileInput.files].forEach(item => {-->
+<!--        data.append('files', item)-->
+<!--      })-->
+<!--      const res = await axios.post('http://localhost:3000/upload',data)-->
+<!--      console.log(res);-->
+<!--    }-->
+<!--  </script>-->
+
+
+<!--单文件分片上传-->
+<input type="file" id="fileInput">
+<script>
+  const fileInput = document.querySelector('#fileInput')
+
+  // 每20k一个分片
+  const chunkSize = 20 * 1024
+  fileInput.onchange = async function() {
+    const file = fileInput.files[0]
+    console.log(file);
+    const chunks = []
+    let startPos = 0
+    while(startPos < file.size) {
+      chunk.push(file.slice(startPos, startPos + chunkSize))
+      startPos +=chunkSize
+    }
+
+    const randomStr = Math.random().toString().slice(2,8)
+
+    const tasks =[]
+    chunks.map((chunk, index) => {
+      const data = new FormData()
+      data.set('name', randomStr + '_' + file.name + '-' + index)
+      data.append('files',chunk)
+      tasks.push( axios.post('http://localhost:3000/upload',data))
+
+    })
+
+    await Promise.all(tasks)
+    axios.get('http://localhost:3000/merge?name=' + randomStr + '_'+ file.name)
+  }
+</script>
+
+</body>
+</html>
